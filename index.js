@@ -2,12 +2,15 @@ const express = require('express')
 const morgan = require('morgan')
 const app = express()
 const cors = require('cors') //new
+const path = require('path')
+
 
 // Middleware
 app.use(express.json()) // for parsing JSON bodies
 app.use(morgan('tiny')) // logs requests to console
 app.use(cors()) //new
 app.use(express.static('dist')) //new
+app.use(unknownEndpoint)
 
 let persons = [
   { id: 1, name: "Arto Hellas", number: "040-123456" },
@@ -44,10 +47,6 @@ app.get('/api/persons/:id', (req, res) => {
   }
 })
 
-app.get('*', (req, res) => {
-  res.sendFile(__dirname + '/dist/index.html')
-})
-
 // DELETE person
 app.delete('/api/persons/:id', (req, res) => {
   const id = Number(req.params.id)
@@ -77,11 +76,13 @@ app.post('/api/persons', (req, res) => {
   res.status(201).json(newPerson)
 })
 
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'dist', 'index.html'))
+})
+
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
-
-app.use(unknownEndpoint)
 
 // Start server
 // const PORT = 3001
