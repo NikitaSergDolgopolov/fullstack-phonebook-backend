@@ -1,0 +1,125 @@
+console.log('hello world')
+
+const http = require('http')
+
+const persons = [
+    { 
+      "id": "1",
+      "name": "Arto Hellas", 
+      "number": "040-123456"
+    },
+    { 
+      "id": "2",
+      "name": "Ada Lovelace", 
+      "number": "39-44-5323523"
+    },
+    { 
+      "id": "3",
+      "name": "Dan Abramov", 
+      "number": "12-43-234345"
+    },
+    { 
+      "id": "4",
+      "name": "Mary Poppendieck", 
+      "number": "39-23-6423122"
+    }
+]
+
+const app = http.createServer((request, response) => {
+  // GET all persons
+  if (request.url === '/api/persons' && request.method === 'GET') {
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    response.end(JSON.stringify(persons))
+  }
+  // GET info 
+  else if (request.url === '/info' && request.method === 'GET') {
+    const numPeople = persons.length
+    const currentTime = new Date()
+    const infoMessage = `
+      <p>Phonebook has info for ${numPeople} people</p>
+      <p>${currentTime}</p>
+    `
+    response.writeHead(200, { 'Content-Type': 'text/html' })
+    response.end(infoMessage)
+  }
+  // GET person by ID
+  else if (request.url.startsWith('/api/persons/') && request.method === 'GET') {
+    const id = request.url.split('/')[3]
+    const person = persons.find(person => person.id === id)
+
+    if (person) {
+      response.writeHead(200, { 'Content-Type': 'application/json' })
+      response.end(JSON.stringify(person))
+    } else {
+      response.writeHead(404, { 'Content-Type': 'application/json' })
+      response.end(JSON.stringify({ error: 'Person not found' }))
+    }
+  }
+  // DELETE person by ID
+  else if (request.url.startsWith('/api/persons/') && request.method === 'DELETE') {
+    const id = request.url.split('/')[3]
+    const person = persons.find(p => p.id === id)
+
+    if (!person) {
+      response.writeHead(404, { 'Content-Type': 'application/json' })
+      response.end(JSON.stringify({ error: 'Person not found' }))
+      return
+    }
+
+    persons = persons.filter(p => p.id !== id)
+    response.writeHead(204) // No Content
+    response.end()
+  }
+
+  // POST a person
+  else if (request.url === '/api/persons' && request.method === 'POST') {
+    let body = ''
+
+    request.on('data', chunk => {
+        body += chunk
+    })
+
+    request.on('end', () => {
+      try {
+        const data = JSON.parse(body)
+        const { name, number } = data
+
+        if (!name || !number) {
+          response.writeHead(400, { 'Content-Type': 'application/json' })
+          response.end(JSON.stringify({ error: 'name or number is missing' }))
+          return
+        }
+
+        if (persons.find(person => person.name === name)) {
+          response.writeHead(400, { 'Content-Type': 'application/json' })
+          response.end(JSON.stringify({ error: 'name must be unique' }))
+          return
+        }
+
+        const newPerson = {
+        id: Math.floor(Math.random() * 1000000).toString(),
+        name: data.name,
+        number: data.number
+        }
+
+        persons.push(newPerson)
+
+        response.writeHead(201, { 'Content-Type': 'application/json' })
+        response.end(JSON.stringify(newPerson))
+      } catch (error) {
+        response.writeHead(400, { 'Content-Type': 'application/json' })
+        response.end(JSON.stringify({ error: 'invalid JSON' }))
+      }
+    })
+  }
+
+
+  else {
+    response.writeHead(404, { 'Content-Type': 'text/plain' })
+    response.end('Not found')
+  }
+})
+
+const PORT = 3001
+app.listen(PORT)
+console.log(`Server running on port ${PORT}`)
