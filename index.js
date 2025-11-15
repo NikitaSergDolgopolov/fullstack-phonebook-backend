@@ -16,9 +16,6 @@ let persons = [
   { id: 4, name: "Mary Poppendieck", number: "39-23-6423122" }
 ]
 
-app.get('/', (request, response) => {
-  response.send('<h1>Hello World!</h1>')
-})
 
 // GET all persons
 app.get('/api/persons', (req, res) => {
@@ -45,6 +42,10 @@ app.get('/api/persons/:id', (req, res) => {
   } else {
     res.status(404).json({ error: 'Person not found' })
   }
+})
+
+app.get('*', (req, res) => {
+  res.sendFile(__dirname + '/dist/index.html')
 })
 
 // DELETE person
