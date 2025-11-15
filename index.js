@@ -4,16 +4,12 @@ const app = express()
 const cors = require('cors') //new
 const path = require('path')
 
-const unknownEndpoint = (req, res) => {
-  res.status(404).send({ error: 'unknown endpoint' })
-}
-
 // Middleware
 app.use(express.json()) // for parsing JSON bodies
 app.use(morgan('tiny')) // logs requests to console
 app.use(cors()) //new
 app.use(express.static('dist')) //new
-app.use(unknownEndpoint)
+
 
 let persons = [
   { id: 1, name: "Arto Hellas", number: "040-123456" },
@@ -82,6 +78,12 @@ app.post('/api/persons', (req, res) => {
 app.get('/*', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'dist', 'index.html'))
 })
+
+// 404 handler
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
 
 // Start server
 // const PORT = 3001
