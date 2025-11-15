@@ -75,9 +75,9 @@ app.post('/api/persons', (req, res) => {
   res.status(201).json(newPerson)
 })
 
-app.get('/*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'dist', 'index.html'))
-})
+// app.get('/*', (req, res) => {
+//   res.sendFile(path.resolve(__dirname, 'dist', 'index.html'))
+// })
 
 // 404 handler
 const unknownEndpoint = (req, res) => {
