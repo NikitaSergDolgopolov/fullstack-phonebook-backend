@@ -75,7 +75,7 @@ app.post('/api/persons', (req, res) => {
   res.status(201).json(newPerson)
 })
 
-app.get('/*', (req, res) => {
+app.use((req, res, next) => {
   res.sendFile(path.resolve(__dirname, 'dist', 'index.html'))
 })
 
