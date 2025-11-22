@@ -1,7 +1,11 @@
-POST http://localhost:3001/api/persons
+# POST http://localhost:3001/api/persons
+POST https://fullstack-phonebook-backend-ysb2.onrender.com/api/persons
 content-type: application/json
 
 {
     "name": "snikita",
     "number": "617"
 }
+
+### Delete a person
+DELETE https://fullstack-phonebook-backend-ysb2.onrender.com/api/persons/650001

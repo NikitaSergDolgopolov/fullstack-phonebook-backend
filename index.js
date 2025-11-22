@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const express = require('express')
 const app = express()
 const cors = require('cors') //new
@@ -11,6 +12,24 @@ app.use(cors()) //new
 app.use(express.static('dist')) //new
 
 
+const password = process.argv[2]
+
+const url = `mongodb+srv://nikitasergdolgopolov_db_user:${password}@cluster0.a6voz28.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
+
+mongoose.set('strictQuery', false)
+mongoose.connect(url)
+
+// 3. Person model
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: String,
+})
+
+const Person = mongoose.model('Person', personSchema)
+
+
+
+
 let persons = [
   { id: 1, name: "Arto Hellas", number: "040-123456" },
   { id: 2, name: "Ada Lovelace", number: "39-44-5323523" },
@@ -20,9 +39,16 @@ let persons = [
 
 
 // GET all persons
+// app.get('/api/persons', (req, res) => {
+//   res.json(persons)
+// })
+
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Person.find({}).then(persons => {
+    res.json(persons)
+  })
 })
+
 
 // GET info
 app.get('/info', (req, res) => {
