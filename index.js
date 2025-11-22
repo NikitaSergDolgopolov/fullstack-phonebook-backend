@@ -11,9 +11,9 @@ app.use(morgan('tiny')) // logs requests to console
 app.use(cors()) //new
 app.use(express.static('dist')) //new
 
+//MongoDB Atlas
 
 const password = process.argv[2]
-
 const url = `mongodb+srv://nikitasergdolgopolov_db_user:${password}@cluster0.a6voz28.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
 mongoose.set('strictQuery', false)
@@ -28,14 +28,14 @@ const personSchema = new mongoose.Schema({
 const Person = mongoose.model('Person', personSchema)
 
 
+//sample data
 
-
-let persons = [
-  { id: 1, name: "Arto Hellas", number: "040-123456" },
-  { id: 2, name: "Ada Lovelace", number: "39-44-5323523" },
-  { id: 3, name: "Dan Abramov", number: "12-43-234345" },
-  { id: 4, name: "Mary Poppendieck", number: "39-23-6423122" }
-]
+// let persons = [
+//   { id: 1, name: "Arto Hellas", number: "040-123456" },
+//   { id: 2, name: "Ada Lovelace", number: "39-44-5323523" },
+//   { id: 3, name: "Dan Abramov", number: "12-43-234345" },
+//   { id: 4, name: "Mary Poppendieck", number: "39-23-6423122" }
+// ]
 
 
 // GET all persons
