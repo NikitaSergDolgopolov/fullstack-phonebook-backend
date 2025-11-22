@@ -1,31 +1,19 @@
-const mongoose = require('mongoose')
+//should be first
+require('dotenv').config()
+
 const express = require('express')
+const Person = require('./models/person')
+console.log(Person)  // <-- what does this print?
 const app = express()
 const cors = require('cors') //new
 const morgan = require('morgan')
 const path = require('path')
 
 // Middleware
-app.use(express.json()) // for parsing JSON bodies
+app.use(express.json()) // for parsing JSON bodies, has to be among first
 app.use(morgan('tiny')) // logs requests to console
 app.use(cors()) //new
 app.use(express.static('dist')) //new
-
-//MongoDB Atlas
-
-const password = process.argv[2]
-const url = `mongodb+srv://nikitasergdolgopolov_db_user:${password}@cluster0.a6voz28.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
-
-mongoose.set('strictQuery', false)
-mongoose.connect(url)
-
-// 3. Person model
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-})
-
-const Person = mongoose.model('Person', personSchema)
 
 
 //sample data
@@ -44,7 +32,7 @@ const Person = mongoose.model('Person', personSchema)
 // })
 
 app.get('/api/persons', (req, res) => {
-  Person.find({}).then(persons => {
+   Person.find({}).then(persons => {
     res.json(persons)
   })
 })
@@ -52,56 +40,61 @@ app.get('/api/persons', (req, res) => {
 
 // GET info
 app.get('/info', (req, res) => {
-  const numPeople = persons.length
-  const currentTime = new Date()
-  res.send(`
-    <p>Phonebook has info for ${numPeople} people</p>
-    <p>${currentTime}</p>
-  `)
+  Person.countDocuments({}).then(count => {
+    const currentTime = new Date()
+    res.send(`
+      <p>Phonebook has info for ${count} people</p>
+      <p>${currentTime}</p>
+    `)
+  })
 })
 
 // GET single person
-app.get('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const person = persons.find(p => p.id === id)
-
-  if (person) {
-    res.json(person)
-  } else {
-    res.status(404).json({ error: 'Person not found' })
-  }
+app.get('/api/persons/:id', (req, res, next) => {
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) {
+        res.json(person)
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch(error => next(error))
+//     .catch(error => {
+//       console.log(error)
+//       response.status(400).send({ error: 'malformatted id' })
+//     })
 })
 
 // DELETE person
-app.delete('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id)
-  persons = persons.filter(p => p.id !== id)
-  res.status(204).end()
+app.delete('/api/persons/:id', (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then(result => {
+      res.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 // POST new person
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
   const { name, number } = req.body
 
   if (!name || !number) {
     return res.status(400).json({ error: 'name or number is missing' })
   }
 
-  if (persons.find(p => p.name === name)) {
-    return res.status(400).json({ error: 'name must be unique' })
-  }
+  const newPerson = new Person({ name, number })
 
-  const newPerson = {
-    id: Math.floor(Math.random() * 1000000),
-    name,
-    number
-  }
-
-  persons = persons.concat(newPerson)
-  res.status(201).json(newPerson)
+  newPerson
+    .save()
+    .then(savedPerson => {
+      res.json(savedPerson)
+    })
+    .catch(error => next(error))
 })
 
-app.use((req, res, next) => {
+//Express 5 no longer supports app.get('*', ..)
+app.use((req, res) => {
   res.sendFile(path.resolve(__dirname, 'dist', 'index.html'))
 })
 
@@ -111,14 +104,26 @@ const unknownEndpoint = (req, res) => {
 }
 app.use(unknownEndpoint)
 
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+app.use(errorHandler) //has to be last
+
+
 // Start server
 // const PORT = 3001
 // app.listen(PORT, () => {
 //   console.log(`Server running on port ${PORT}`)
 // })
 
- //new
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
