@@ -12,10 +12,12 @@ const initialPersons = [
   {
     name: 'Person 1',
     number: '123',
+    user: '123456'
   },
   {
     name: 'Person 2',
     number: '321',
+    user: '141414'
   },
 ]
 

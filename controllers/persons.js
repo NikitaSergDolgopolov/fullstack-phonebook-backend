@@ -1,5 +1,7 @@
 const personsRouter = require('express').Router()
 const Person = require('../models/person')
+const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 const path = require('path')
 
 //sample data
@@ -11,15 +13,20 @@ const path = require('path')
 //   { id: 4, name: "Mary Poppendieck", number: "39-23-6423122" }
 // ]
 
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '')
+  }
+  return null
+}
 
-// GET all persons
-// app.get('/api/persons', (req, res) => {
-//   res.json(persons)
-// })
 
 personsRouter.get('/', async (req, res, next) => {
   try{
-    const persons = await Person.find({})
+    // const persons = await Person.find({})
+    const persons = await Person
+    .find({}).populate('user', { username: 1, name: 1 })
     res.json(persons)
   } catch(error){
     next(error)
@@ -54,13 +61,31 @@ personsRouter.delete('/:id', async (req, res, next) => {
 // POST new person
 personsRouter.post('/', async (req, res, next) => {
   try {
-    const { name, number } = req.body
+    const { name, number, userId } = req.body
+
+    // const user = await User.findById(userId)
+    const decodedToken = jwt.verify(getTokenFrom(req), process.env.SECRET)
+    if (!decodedToken.id) {
+      return response.status(401).json({ error: 'token invalid' })
+    }
+    const user = await User.findById(decodedToken.id)
+
+    if (!user) {
+      return res.status(400).json({ error: 'userId missing or not valid' })
+    }
+
     if (!name || !number) {
       return res.status(400).json({ error: 'name or number is missing' })
     }
-    const newPerson = new Person({ name, number })
-    await newPerson.save()
-    res.json(newPerson)
+
+    const newPerson = new Person({ name, number, user: userId })
+    const savedContact = await newPerson.save()
+    
+    user.contacts = user.contacts.concat(savedContact._id)
+    await user.save()
+    
+    res.status(201).json(savedContact)
+
   } catch(error){
     next(error)
   }
