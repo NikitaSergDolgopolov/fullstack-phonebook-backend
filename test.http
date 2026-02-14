@@ -1,16 +1,46 @@
+# POST http://localhost:3001/api/persons
+# # POST https://fullstack-phonebook-backend-ysb2.onrender.com/api/persons
+# content-type: application/json
+
+# {
+#     "name": "onlyname two",
+#     "number": "number",
+#     "userId": "692c00af7608cb54d18cd9a8"
+# }
+
+
+# ### Delete a person
+# # DELETE https://fullstack-phonebook-backend-ysb2.onrender.com/api/persons/650001
+
+# DELETE http://localhost:3001/api/persons/692221c461e5f0a3a225f80e
+
+
+
+# POST http://localhost:3001/api/users
+# content-type: application/json
+
+# {
+#     "username": "roots",
+#     "name": "Superuser",
+#     "password": "salainen"
+# }
+
+# POST http://localhost:3001/api/login
+# content-type: application/json
+
+# {
+#     "username": "roots",
+#     "password": "salainen"
+# }
+
+
+
 POST http://localhost:3001/api/persons
-# POST https://fullstack-phonebook-backend-ysb2.onrender.com/api/persons
 content-type: application/json
+Authorization: Bearer dyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3RzIiwiaWQiOiI2OTJjMDBhZjc2MDhjYjU0ZDE4Y2Q5YTgiLCJpYXQiOjE3NjQ0OTc2NjB9.iQMSq-bPqaW9yNZbwQh7ADMuMxdk1kCdPNUgyryCcW0
 
 {
-    "name": "onlyname",
-    "number": ""
+    "name": "onlyname three",
+    "number": "number",
+    "userId": "692c00af7608cb54d18cd9a8"
 }
-
-
-### Delete a person
-# DELETE https://fullstack-phonebook-backend-ysb2.onrender.com/api/persons/650001
-
-DELETE http://localhost:3001/api/persons/692221c461e5f0a3a225f80e
-
-
